@@ -74,3 +74,24 @@ def update_expense(
     db.refresh(expense)
 
     return expense
+
+@app.delete("/expense/{expense_id}")
+def delete_expense(
+    expense_id: int,
+    db: Session = Depends(get_db)
+):
+
+    expense = db.query(models.Expense).filter(
+        models.Expense.id == expense_id
+    ).first()
+
+    if expense is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Expense not found"
+        )
+
+    db.delete(expense)
+    db.commit()
+
+    return {"message": "Expense deleted successfully"}
