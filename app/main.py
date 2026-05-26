@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import engine, Base, get_db
@@ -30,3 +30,47 @@ def get_expenses(db: Session = Depends(get_db)):
     expenses = db.query(models.Expense).all()
 
     return expenses
+
+@app.get("/expense/{expense_id}")
+def get_expense(
+    expense_id: int,
+    db:Session = Depends(get_db)
+):
+    
+    expense = db.query(models.Expense).filter(
+        models.Expense.id == expense_id
+    ).first()
+
+    if expense is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Expense not found"
+        )
+
+    return expense
+
+
+@app.put("/expense/{expense_id}")
+def update_expense(
+    expense_id:int,
+    updated_expense: schemas.ExpenseCreate,
+    db: Session = Depends(get_db)
+):
+    expense = db.query(models.Expense).filter(
+        models.Expense.id == expense_id
+    ).first()
+
+    if expense is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Expense not found"
+        )
+    
+    expense.title = updated_expense.title
+    expense.amount = updated_expense.amount
+    expense.category = updated_expense.category
+
+    db.commit()
+    db.refresh(expense)
+
+    return expense
