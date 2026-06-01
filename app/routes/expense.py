@@ -66,6 +66,13 @@ def monthly_summary(
 ):
     return crud.get_monthly_summary(db, current_user)
 
+@router.get("/expenses/stats",
+            response_model=schemas.ExpenseStats)
+def expense_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return crud.get_expense_stats(db, current_user)
 
 @router.put("/expense/{expense_id}")
 def update_expense(

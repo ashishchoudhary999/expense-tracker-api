@@ -122,4 +122,33 @@ def get_monthly_summary(
         })
 
     return summary
-    
+
+
+def get_expense_stats(db: Session, current_user: User):
+    stats = db.query(
+        func.max(Expense.amount).label("highest"),
+        func.avg(Expense.amount).label("average"),
+        func.count(Expense.id).label("count")
+    ).filter(
+        Expense.user_id == current_user.id
+    ).first()
+
+    top_category = db.query(
+    Expense.category,
+    func.count(Expense.id).label("cnt")
+    ).filter(
+        Expense.user_id == current_user.id
+    ).group_by(
+        Expense.category
+    ).order_by(
+        func.count(Expense.id).desc()
+    ).first()
+
+    most_used = top_category.category if top_category else "None"
+
+    return {
+        "highest_expense": stats.highest,
+        "average_expense": round(stats.average, 2) if stats.average else 0,
+        "most_used_category": most_used,
+        "total_count": stats.count
+    }
