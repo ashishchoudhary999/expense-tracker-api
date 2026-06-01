@@ -1,16 +1,20 @@
 from sqlalchemy.orm import Session
-from app import models, schemas
+from . import models, schemas
+from .models import User
 
 
 def create_expense(
     db: Session,
-    expense: schemas.ExpenseCreate
+    expense: schemas.ExpenseCreate,
+    current_user: User
 ):
 
     new_expense = models.Expense(
         title=expense.title,
         amount=expense.amount,
-        category=expense.category
+        category=expense.category,
+        user_id=current_user.id
+
     )
 
     db.add(new_expense)
@@ -20,29 +24,34 @@ def create_expense(
     return new_expense
 
 
-def get_expenses(db: Session):
-
-    return db.query(models.Expense).all()
+def get_expenses(db: Session, current_user: User):
+    return db.query(models.Expense).filter(
+        models.Expense.user_id == current_user.id
+    ).all()
 
 
 def get_expense(
     db: Session,
-    expense_id: int
+    expense_id: int,
+    current_user: User
 ):
 
     return db.query(models.Expense).filter(
-        models.Expense.id == expense_id
+        models.Expense.id == expense_id,
+        models.Expense.user_id == current_user.id
     ).first()
 
 
 def update_expense(
     db: Session,
     expense_id: int,
-    updated_expense: schemas.ExpenseCreate
+    updated_expense: schemas.ExpenseCreate,
+    current_user: User
 ):
 
     expense = db.query(models.Expense).filter(
-        models.Expense.id == expense_id
+        models.Expense.id == expense_id,
+        models.Expense.user_id == current_user.id
     ).first()
 
     expense.title = updated_expense.title
@@ -57,11 +66,13 @@ def update_expense(
 
 def delete_expense(
     db: Session,
-    expense_id: int
+    expense_id: int,
+    current_user: User
 ):
 
     expense = db.query(models.Expense).filter(
-        models.Expense.id == expense_id
+        models.Expense.id == expense_id,
+        models.Expense.user_id == current_user.id
     ).first()
 
     db.delete(expense)
