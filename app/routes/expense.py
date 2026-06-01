@@ -58,6 +58,14 @@ def category_summary(
 
     return crud.get_category_summary(db,current_user)
 
+@router.get("/expenses/summary/monthly",
+            response_model=List[schemas.MonthlySummary])
+def monthly_summary(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user) 
+):
+    return crud.get_monthly_summary(db, current_user)
+
 
 @router.put("/expense/{expense_id}")
 def update_expense(

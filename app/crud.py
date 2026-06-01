@@ -97,3 +97,29 @@ def get_category_summary(
         ).all()
 
     return results
+
+def get_monthly_summary(
+        db: Session,
+        current_user: User
+):
+    results = db.query(
+        extract("year", Expense.created_at).label("year"),
+        extract("month", Expense.created_at).label("month"),
+        func.sum(Expense.amount).label("total")
+    ).filter(
+        Expense.user_id == current_user.id
+    ).group_by(
+        extract("year", Expense.created_at),
+        extract("month", Expense.created_at)
+    ).all()
+
+    summary = []
+    for row in results:
+        month_str = f"{int(row.year)}-{int(row.month):02d}"
+        summary.append({
+            "month": month_str,
+            "total": row.total
+        })
+
+    return summary
+    
