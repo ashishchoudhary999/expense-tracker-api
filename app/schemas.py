@@ -19,3 +19,16 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class CategorySummary(BaseModel):
+    category: str
+    total: float
+
+class MonthlySummary(BaseModel):
+    month: str
+    total: float
+
+class ExpenseStats(BaseModel):
+    highest_expense: float
+    average_expense: float
+    most_used_category: str
+    total_count: int

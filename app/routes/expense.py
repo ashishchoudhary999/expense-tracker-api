@@ -5,6 +5,7 @@ from .. database import get_db
 from .. import schemas, crud
 from ..auth import get_current_user
 from ..models import User
+from typing import List
 
 router = APIRouter()
 
@@ -45,6 +46,17 @@ def get_expense(
         )
 
     return expense
+
+
+@router.get("/expenses/summary/category",
+             response_model=List[schemas.CategorySummary])
+def category_summary(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    crud.get_category_summary(db,current_user)
+
+    return crud.get_category_summary(db,current_user)
 
 
 @router.put("/expense/{expense_id}")

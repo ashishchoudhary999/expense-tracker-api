@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
-from .models import User
-
+from .models import Expense, User
+from sqlalchemy import func, extract
+from typing import List
+from .schemas import CategorySummary, MonthlySummary, ExpenseStats
 
 def create_expense(
     db: Session,
@@ -79,3 +81,19 @@ def delete_expense(
     db.commit()
 
     return {"message": "Expense deleted successfully"}
+
+def get_category_summary(
+        db: Session,
+        current_user: User
+):
+
+    results = db.query(
+        Expense.category.label("category"), 
+        func.sum(Expense.amount).label("total")
+    ).filter(
+        Expense.user_id == current_user.id
+    ).group_by(
+        Expense.category
+        ).all()
+
+    return results
